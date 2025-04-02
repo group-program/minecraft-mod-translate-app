@@ -2,7 +2,7 @@
 
 // このモジュールはアプリケーションの生き死にを制御し、ネイティブブラウザウインドウを作成します
 const fs = require("fs")
-const { app, BrowserWindow,ipcMain,dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('node:path')
 
 const createWindow = () => {
@@ -46,16 +46,25 @@ app.on('window-all-closed', () => {
 // インクルードできます。 
 // 別々のファイルに分割してここで require することもできます。
 
-ipcMain.handle('open',async(event)=>{
-  const {canceled,filePaths} = await dialog.showOpenDialog({
-    filters:[
-      {name:'Documents',extension:['txt']}
+ipcMain.handle('open', async (event) => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    filters: [
+      { name: 'Documents', extension: ['txt'] }
     ]
   })
-  if(canceled) return{canceled,data:[]}
-  
-  const data= filePaths.map((filePath)=>
-  fs.readFileSync(filePath,{encoding:'utf-8'})
-)
-return {canceled,data}
+  if (canceled) return { canceled, data: [] }
+
+  const data = filePaths.map((filePath) =>
+    fs.readFileSync(filePath, { encoding: 'utf-8' })
+  )
+  return { canceled, data }
+})
+ipcMain.handle('save', async (event, data) => {
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    filters: [
+      { name: 'Documents', extension: ['txt'] }
+    ]
+  })
+  if (canceled) return
+  fs.writeFileSync(filePath, data)
 })
