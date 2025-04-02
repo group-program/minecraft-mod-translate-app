@@ -1,7 +1,8 @@
 // main.js
 
 // このモジュールはアプリケーションの生き死にを制御し、ネイティブブラウザウインドウを作成します
-const { app, BrowserWindow } = require('electron')
+const fs = require("fs")
+const { app, BrowserWindow,ipcMain,dialog } = require('electron')
 const path = require('node:path')
 
 const createWindow = () => {
@@ -44,3 +45,17 @@ app.on('window-all-closed', () => {
 // このファイルでは、アプリ内のとある他のメインプロセスコードを
 // インクルードできます。 
 // 別々のファイルに分割してここで require することもできます。
+
+ipcMain.handle('open',async(event)=>{
+  const {canceled,filePaths} = await dialog.showOpenDialog({
+    filters:[
+      {name:'Documents',extension:['txt']}
+    ]
+  })
+  if(canceled) return{canceled,data:[]}
+  
+  const data= filePaths.map((filePath)=>
+  fs.readFileSync(filePath,{encoding:'utf-8'})
+)
+return {canceled,data}
+})
